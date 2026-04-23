@@ -1,5 +1,238 @@
-﻿@inherits DotNetNuke.Web.Mvc.Framework.DnnWebViewPage<IEnumerable<Ceramista.Dnn.Ceramista.Dnn.HelloWorld.Models.Item>>
-@using DotNetNuke.Web.Mvc.Helpers
-<div id="Items-@Dnn.ModuleContext.ModuleId">
-    <p>Hello World</p>
+@inherits DotNetNuke.Web.Mvc.Framework.DnnWebViewPage<System.Collections.Generic.List<Ceramista.Dnn.Ceramista.Dnn.HelloWorld.Models.ProductViewModel>>
+@using DotNetNuke.Web.Client.ClientResourceManagement
+@{
+    ClientResourceManager.RegisterStyleSheet(Dnn.DnnPage, "~/DesktopModules/MVC/Ceramista.Dnn.HelloWorld/module.css");
+    var mid = Dnn.ModuleContext.ModuleId.ToString();
+}
+
+<div id="ceramista-@mid" class="ceramista-comparer">
+
+    <!-- Termék választó sor -->
+    <div class="ceramista-selector">
+        <select id="ceramista-select-@mid">
+            <option value="">— Válassz terméket —</option>
+        </select>
+        <button id="ceramista-add-@mid" class="ceramista-btn-add" type="button">Hozzáadás</button>
+    </div>
+
+    <!-- Összehasonlító kártyák (mindig 4 slot) -->
+    <div id="ceramista-cards-@mid" class="ceramista-cards">
+        <div class="ceramista-card"><span class="ceramista-card-placeholder">Üres hely</span></div>
+        <div class="ceramista-card"><span class="ceramista-card-placeholder">Üres hely</span></div>
+        <div class="ceramista-card"><span class="ceramista-card-placeholder">Üres hely</span></div>
+        <div class="ceramista-card"><span class="ceramista-card-placeholder">Üres hely</span></div>
+    </div>
+
+    <!-- Ajánlott termékek (csak 2+ kiválasztásnál jelenik meg) -->
+    <div id="ceramista-recommendations-@mid" class="ceramista-recommendations">
+        <h3>Ajánlott termékek</h3>
+        <div class="ceramista-rec-cards"></div>
+    </div>
+
 </div>
+
+<script type="text/javascript">
+(function ($) {
+    var mid = '@mid';
+    var allProducts = @Html.Raw(ViewBag.ProductsJson ?? "[]");
+    var MAX_COMPARE = 4;
+    var selectedIds = [];
+
+    /* ---- Helpers ---- */
+
+    function getProduct(id) {
+        for (var i = 0; i < allProducts.length; i++) {
+            if (allProducts[i].Id === id) return allProducts[i];
+        }
+        return null;
+    }
+
+    function formatPrice(price) {
+        var p = Math.round(price);
+        return p.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + '\u00a0Ft';
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    /* ---- Render functions ---- */
+
+    function renderSelector() {
+        var $select = $('#ceramista-select-' + mid);
+        var $btn    = $('#ceramista-add-'    + mid);
+        var full    = selectedIds.length >= MAX_COMPARE;
+
+        $select.empty();
+        $select.append('<option value="">\u2014 V\u00e1lassz term\u00e9ket \u2014</option>');
+
+        for (var i = 0; i < allProducts.length; i++) {
+            var p = allProducts[i];
+            if (selectedIds.indexOf(p.Id) === -1) {
+                $select.append(
+                    $('<option>').val(p.Id).text(p.Name)
+                );
+            }
+        }
+
+        $select.prop('disabled', full);
+        $btn.prop('disabled', full);
+    }
+
+    function makeCardImg(p) {
+        if (p.ImageUrl) {
+            return '<img class="ceramista-card-img" src="' + escHtml(p.ImageUrl) + '" alt="' + escHtml(p.Name) + '">';
+        }
+        return '<div class="ceramista-card-img-placeholder">Nincs k\u00e9p</div>';
+    }
+
+    function makeRecImg(p) {
+        if (p.ImageUrl) {
+            return '<img src="' + escHtml(p.ImageUrl) + '" alt="' + escHtml(p.Name) + '">';
+        }
+        return '<div class="ceramista-rec-img-placeholder">Nincs k\u00e9p</div>';
+    }
+
+    function renderCards() {
+        var $container = $('#ceramista-cards-' + mid);
+        $container.empty();
+
+        for (var i = 0; i < MAX_COMPARE; i++) {
+            var $slot = $('<div class="ceramista-card">');
+
+            if (i < selectedIds.length) {
+                var p = getProduct(selectedIds[i]);
+                if (!p) { $slot.append('<span class="ceramista-card-placeholder">Hiba</span>'); }
+                else {
+                    $slot.addClass('filled');
+                    $slot.append(
+                        '<button class="ceramista-card-remove" data-id="' + escHtml(p.Id) + '" title="Elt\u00e1vol\u00edt\u00e1s">\u00d7</button>'
+                    );
+                    $slot.append(makeCardImg(p));
+                    $slot.append(
+                        '<div class="ceramista-card-body">' +
+                            '<div class="ceramista-card-name">' + escHtml(p.Name) + '</div>' +
+                            '<div class="ceramista-card-price">' + formatPrice(p.Price) + '</div>' +
+                        '</div>'
+                    );
+                }
+            } else {
+                $slot.append('<span class="ceramista-card-placeholder">\u00dcres hely</span>');
+            }
+
+            $container.append($slot);
+        }
+    }
+
+    function renderRecommendations() {
+        var $section = $('#ceramista-recommendations-' + mid);
+
+        if (selectedIds.length < 2) {
+            $section.removeClass('visible');
+            return;
+        }
+
+        /* Collect categories and price range of selected products */
+        var selectedCats = {};
+        var selectedPrices = [];
+
+        for (var i = 0; i < selectedIds.length; i++) {
+            var sp = getProduct(selectedIds[i]);
+            if (!sp) continue;
+            selectedPrices.push(sp.Price);
+            for (var c = 0; c < sp.CategoryIds.length; c++) {
+                selectedCats[sp.CategoryIds[c]] = true;
+            }
+        }
+
+        /* Score every unselected product */
+        var scored = [];
+        for (var j = 0; j < allProducts.length; j++) {
+            var p = allProducts[j];
+            if (selectedIds.indexOf(p.Id) !== -1) continue;
+
+            var score = 0;
+
+            for (var k = 0; k < p.CategoryIds.length; k++) {
+                if (selectedCats[p.CategoryIds[k]]) { score += 3; break; }
+            }
+
+            for (var m = 0; m < selectedPrices.length; m++) {
+                var ref = selectedPrices[m];
+                if (p.Price >= ref * 0.75 && p.Price <= ref * 1.25) { score += 1; break; }
+            }
+
+            if (score > 0) scored.push({ product: p, score: score });
+        }
+
+        scored.sort(function (a, b) { return b.score - a.score; });
+        scored = scored.slice(0, 4);
+
+        var $cards = $section.find('.ceramista-rec-cards');
+        $cards.empty();
+
+        for (var n = 0; n < scored.length; n++) {
+            var rp = scored[n].product;
+            $cards.append(
+                '<div class="ceramista-rec-card">' +
+                    makeRecImg(rp) +
+                    '<div class="ceramista-rec-card-body">' +
+                        '<div class="ceramista-rec-card-name">' + escHtml(rp.Name) + '</div>' +
+                        '<button class="ceramista-rec-btn-add" data-id="' + escHtml(rp.Id) + '">Hozz\u00e1ad\u00e1s</button>' +
+                    '</div>' +
+                '</div>'
+            );
+        }
+
+        $section.addClass('visible');
+    }
+
+    /* ---- State mutations ---- */
+
+    function addProduct(id) {
+        if (selectedIds.length >= MAX_COMPARE) return;
+        if (selectedIds.indexOf(id) !== -1) return;
+        selectedIds.push(id);
+        update();
+    }
+
+    function removeProduct(id) {
+        for (var i = selectedIds.length - 1; i >= 0; i--) {
+            if (selectedIds[i] === id) { selectedIds.splice(i, 1); break; }
+        }
+        update();
+    }
+
+    function update() {
+        renderSelector();
+        renderCards();
+        renderRecommendations();
+    }
+
+    /* ---- Event bindings (scoped to this module instance) ---- */
+
+    var $root = $('#ceramista-' + mid);
+
+    $root.on('click', '#ceramista-add-' + mid, function () {
+        var id = $('#ceramista-select-' + mid).val();
+        if (id) addProduct(id);
+    });
+
+    $root.on('click', '.ceramista-card-remove', function () {
+        removeProduct($(this).data('id'));
+    });
+
+    $root.on('click', '.ceramista-rec-btn-add', function () {
+        var id = $(this).data('id');
+        if (id) addProduct(id);
+    });
+
+    /* ---- Kick off ---- */
+    update();
+
+}(jQuery));
+</script>
