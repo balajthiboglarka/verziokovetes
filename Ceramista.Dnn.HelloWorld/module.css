@@ -17,18 +17,67 @@
     align-items: center;
 }
 
-.ceramista-selector select {
+.ceramista-search-wrapper {
+    position: relative;
     flex: 1;
+}
+
+.ceramista-search-input {
+    width: 100%;
     padding: 10px 14px;
     border: 2px solid #1a2060;
     border-radius: 4px;
     background: #fff;
     color: #1a2060;
     font-size: 15px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.ceramista-search-input:focus {
+    border-color: #2a3490;
+    box-shadow: 0 0 0 2px rgba(26, 32, 96, 0.12);
+}
+
+.ceramista-search-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.ceramista-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 2px solid #1a2060;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 9999;
+    box-shadow: 0 4px 10px rgba(26, 32, 96, 0.12);
+}
+
+.ceramista-dropdown-item {
+    padding: 9px 14px;
+    font-size: 14px;
+    color: #1a2060;
     cursor: pointer;
 }
 
-.ceramista-selector select:disabled,
+.ceramista-dropdown-item:hover {
+    background: #f0ede8;
+}
+
+.ceramista-dropdown-empty {
+    padding: 9px 14px;
+    font-size: 14px;
+    color: #b0a898;
+    font-style: italic;
+}
+
 .ceramista-btn-add:disabled {
     opacity: 0.4;
     cursor: not-allowed;
