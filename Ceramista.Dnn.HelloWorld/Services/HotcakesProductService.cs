@@ -22,7 +22,8 @@ namespace Ceramista.Dnn.Ceramista.Dnn.HelloWorld.Services
                     p.bvin,
                     pt.ProductName,
                     p.SitePrice,
-                    p.ImageFileSmall
+                    p.ImageFileSmall,
+                    p.Featured
                 FROM hcc_Product p
                 JOIN hcc_ProductTranslations pt ON pt.ProductId = p.bvin
                 WHERE p.Status = 1
@@ -47,7 +48,8 @@ namespace Ceramista.Dnn.Ceramista.Dnn.HelloWorld.Services
                             Price = Convert.ToDecimal(reader["SitePrice"]),
                             ImageUrl = !string.IsNullOrWhiteSpace(imageFile)
                                 ? string.Format("/Portals/0/Hotcakes/Data/products/{0}/small/{1}", id, imageFile)
-                                : null
+                                : null,
+                            IsFeatured = reader["Featured"] != DBNull.Value && Convert.ToBoolean(reader["Featured"])
                         };
                     }
                 }
