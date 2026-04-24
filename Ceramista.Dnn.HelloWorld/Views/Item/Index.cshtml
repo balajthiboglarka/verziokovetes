@@ -157,49 +157,62 @@
     function renderRecommendations() {
         var $section = $('#ceramista-recommendations-' + mid);
 
-        if (selectedIds.length < 2) {
-            $section.removeClass('visible');
-            return;
-        }
-
-        /* Collect categories and price range of selected products */
-        var selectedCats = {};
-        var selectedPrices = [];
-
-        for (var i = 0; i < selectedIds.length; i++) {
-            var sp = getProduct(selectedIds[i]);
-            if (!sp) continue;
-            selectedPrices.push(sp.Price);
-            for (var c = 0; c < sp.CategoryIds.length; c++) {
-                selectedCats[sp.CategoryIds[c]] = true;
-            }
-        }
-
-        /* Score every unselected product */
         var scored = [];
-        for (var j = 0; j < allProducts.length; j++) {
-            var p = allProducts[j];
-            if (selectedIds.indexOf(p.Id) !== -1) continue;
 
-            var score = 0;
+        if (selectedIds.length === 0) {
+            /* Nincs kiválasztott termék: kiemelt (featured) termékeket ajánljuk, fallback: első 4 */
+            var featured = [];
+            for (var d = 0; d < allProducts.length; d++) {
+                if (allProducts[d].IsFeatured) featured.push(allProducts[d]);
+            }
+            var defaults = featured.length > 0 ? featured : allProducts;
+            for (var f = 0; f < defaults.length && f < 4; f++) {
+                scored.push({ product: defaults[f], score: 0 });
+            }
+        } else {
+            /* Collect categories and price range of selected products */
+            var selectedCats = {};
+            var selectedPrices = [];
 
-            for (var k = 0; k < p.CategoryIds.length; k++) {
-                if (selectedCats[p.CategoryIds[k]]) { score += 3; break; }
+            for (var i = 0; i < selectedIds.length; i++) {
+                var sp = getProduct(selectedIds[i]);
+                if (!sp) continue;
+                selectedPrices.push(sp.Price);
+                for (var c = 0; c < sp.CategoryIds.length; c++) {
+                    selectedCats[sp.CategoryIds[c]] = true;
+                }
             }
 
-            for (var m = 0; m < selectedPrices.length; m++) {
-                var ref = selectedPrices[m];
-                if (p.Price >= ref * 0.75 && p.Price <= ref * 1.25) { score += 1; break; }
+            /* Score every unselected product */
+            for (var j = 0; j < allProducts.length; j++) {
+                var p = allProducts[j];
+                if (selectedIds.indexOf(p.Id) !== -1) continue;
+
+                var score = 0;
+
+                for (var k = 0; k < p.CategoryIds.length; k++) {
+                    if (selectedCats[p.CategoryIds[k]]) { score += 3; break; }
+                }
+
+                for (var m = 0; m < selectedPrices.length; m++) {
+                    var ref = selectedPrices[m];
+                    if (p.Price >= ref * 0.75 && p.Price <= ref * 1.25) { score += 1; break; }
+                }
+
+                if (score > 0) scored.push({ product: p, score: score });
             }
 
-            if (score > 0) scored.push({ product: p, score: score });
+            scored.sort(function (a, b) { return b.score - a.score; });
+            scored = scored.slice(0, 4);
         }
-
-        scored.sort(function (a, b) { return b.score - a.score; });
-        scored = scored.slice(0, 4);
 
         var $cards = $section.find('.ceramista-rec-cards');
         $cards.empty();
+
+        if (scored.length === 0) {
+            $section.removeClass('visible');
+            return;
+        }
 
         for (var n = 0; n < scored.length; n++) {
             var rp = scored[n].product;
