@@ -9,10 +9,12 @@
 
     <!-- Termék választó sor -->
     <div class="ceramista-selector">
-        <select id="ceramista-select-@mid">
-            <option value="">— Válassz terméket —</option>
-        </select>
-        <button id="ceramista-add-@mid" class="ceramista-btn-add" type="button">Hozzáadás</button>
+        <div class="ceramista-search-wrapper">
+            <input type="text" id="ceramista-search-@mid" class="ceramista-search-input"
+                   placeholder="Keress terméket..." autocomplete="off" />
+            <div id="ceramista-dropdown-@mid" class="ceramista-dropdown"></div>
+        </div>
+        <button id="ceramista-add-@mid" class="ceramista-btn-add" type="button" disabled>Hozzáadás</button>
     </div>
 
     <!-- Összehasonlító kártyák (mindig 4 slot) -->
@@ -37,6 +39,7 @@
     var allProducts = @Html.Raw(ViewBag.ProductsJson ?? "[]");
     var MAX_COMPARE = 4;
     var selectedIds = [];
+    var selectedProductId = null;
 
     /* ---- Helpers ---- */
 
@@ -60,27 +63,50 @@
             .replace(/"/g, '&quot;');
     }
 
-    /* ---- Render functions ---- */
+    /* ---- Search dropdown helpers ---- */
 
-    function renderSelector() {
-        var $select = $('#ceramista-select-' + mid);
-        var $btn    = $('#ceramista-add-'    + mid);
-        var full    = selectedIds.length >= MAX_COMPARE;
-
-        $select.empty();
-        $select.append('<option value="">\u2014 V\u00e1lassz term\u00e9ket \u2014</option>');
-
+    function getAvailableProducts(query) {
+        var q = (query || '').toLowerCase().trim();
+        var result = [];
         for (var i = 0; i < allProducts.length; i++) {
             var p = allProducts[i];
-            if (selectedIds.indexOf(p.Id) === -1) {
-                $select.append(
-                    $('<option>').val(p.Id).text(p.Name)
+            if (selectedIds.indexOf(p.Id) !== -1) continue;
+            if (!q || p.Name.toLowerCase().indexOf(q) !== -1) {
+                result.push(p);
+            }
+        }
+        return result;
+    }
+
+    function showDropdown(products) {
+        var $dd = $('#ceramista-dropdown-' + mid);
+        $dd.empty();
+        if (products.length === 0) {
+            $dd.append('<div class="ceramista-dropdown-empty">Nincs tal\u00e1lat</div>');
+        } else {
+            for (var i = 0; i < products.length; i++) {
+                var p = products[i];
+                $dd.append(
+                    $('<div class="ceramista-dropdown-item">')
+                        .attr('data-id', p.Id)
+                        .text(p.Name)
                 );
             }
         }
+        $dd.show();
+    }
 
-        $select.prop('disabled', full);
-        $btn.prop('disabled', full);
+    function hideDropdown() {
+        $('#ceramista-dropdown-' + mid).hide();
+    }
+
+    /* ---- Render functions ---- */
+
+    function renderSelector() {
+        var full = selectedIds.length >= MAX_COMPARE;
+        $('#ceramista-search-' + mid).prop('disabled', full);
+        $('#ceramista-add-'    + mid).prop('disabled', full || !selectedProductId);
+        if (full) hideDropdown();
     }
 
     function makeCardImg(p) {
@@ -197,6 +223,9 @@
         if (selectedIds.length >= MAX_COMPARE) return;
         if (selectedIds.indexOf(id) !== -1) return;
         selectedIds.push(id);
+        selectedProductId = null;
+        $('#ceramista-search-' + mid).val('');
+        hideDropdown();
         update();
     }
 
@@ -217,9 +246,35 @@
 
     var $root = $('#ceramista-' + mid);
 
+    $root.on('input', '#ceramista-search-' + mid, function () {
+        selectedProductId = null;
+        $('#ceramista-add-' + mid).prop('disabled', true);
+        showDropdown(getAvailableProducts($(this).val()));
+    });
+
+    $root.on('focus', '#ceramista-search-' + mid, function () {
+        showDropdown(getAvailableProducts($(this).val()));
+    });
+
+    $root.on('click', '.ceramista-dropdown-item', function () {
+        var id = $(this).attr('data-id');
+        var p  = getProduct(id);
+        if (p) {
+            selectedProductId = id;
+            $('#ceramista-search-' + mid).val(p.Name);
+            hideDropdown();
+            $('#ceramista-add-' + mid).prop('disabled', false);
+        }
+    });
+
+    $(document).on('click.ceramista-' + mid, function (e) {
+        if (!$(e.target).closest('#ceramista-' + mid + ' .ceramista-search-wrapper').length) {
+            hideDropdown();
+        }
+    });
+
     $root.on('click', '#ceramista-add-' + mid, function () {
-        var id = $('#ceramista-select-' + mid).val();
-        if (id) addProduct(id);
+        if (selectedProductId) addProduct(selectedProductId);
     });
 
     $root.on('click', '.ceramista-card-remove', function () {
