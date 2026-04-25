@@ -139,12 +139,14 @@
                         '<button class="ceramista-card-remove" data-id="' + escHtml(p.Id) + '" title="Elt\u00e1vol\u00edt\u00e1s">\u00d7</button>'
                     );
                     $slot.append(makeCardImg(p));
-                    $slot.append(
+                    var cardBody =
                         '<div class="ceramista-card-body">' +
+                            (p.CategoryName ? '<div class="ceramista-card-category">' + escHtml(p.CategoryName) + '</div>' : '') +
                             '<div class="ceramista-card-name">' + escHtml(p.Name) + '</div>' +
                             '<div class="ceramista-card-price">' + formatPrice(p.Price) + '</div>' +
-                        '</div>'
-                    );
+                            (p.Description ? '<div class="ceramista-card-desc">' + escHtml(p.Description) + '</div>' : '') +
+                        '</div>';
+                    $slot.append(cardBody);
                 }
             } else {
                 $slot.append('<span class="ceramista-card-placeholder">\u00dcres hely</span>');
@@ -221,6 +223,7 @@
                     makeRecImg(rp) +
                     '<div class="ceramista-rec-card-body">' +
                         '<div class="ceramista-rec-card-name">' + escHtml(rp.Name) + '</div>' +
+                        '<div class="ceramista-rec-card-price">' + formatPrice(rp.Price) + '</div>' +
                         '<button class="ceramista-rec-btn-add" data-id="' + escHtml(rp.Id) + '">Hozz\u00e1ad\u00e1s</button>' +
                     '</div>' +
                 '</div>'

@@ -6,7 +6,10 @@ namespace Ceramista.Dnn.Ceramista.Dnn.HelloWorld.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
+        public string CategoryName { get; set; }
         public decimal Price { get; set; }
+        public decimal ListPrice { get; set; }
         public string ImageUrl { get; set; }
         public List<string> CategoryIds { get; set; }
         public bool IsFeatured { get; set; }

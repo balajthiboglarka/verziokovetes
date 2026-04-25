@@ -196,10 +196,34 @@
     margin-bottom: 8px;
 }
 
+.ceramista-card-category {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #f8f5f0;
+    background: #1a2060;
+    border-radius: 3px;
+    padding: 2px 7px;
+    margin-bottom: 6px;
+}
+
 .ceramista-card-price {
     font-size: 15px;
     font-weight: 600;
     color: #1a2060;
+    margin-bottom: 8px;
+}
+
+.ceramista-card-desc {
+    font-size: 12px;
+    color: #4a5080;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* ---- Recommendations ---- */
@@ -269,6 +293,13 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     flex: 1;
+    margin-bottom: 8px;
+}
+
+.ceramista-rec-card-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a2060;
     margin-bottom: 8px;
 }
 
