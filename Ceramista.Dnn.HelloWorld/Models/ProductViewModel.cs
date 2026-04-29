@@ -13,6 +13,7 @@ namespace Ceramista.Dnn.Ceramista.Dnn.HelloWorld.Models
         public string ImageUrl { get; set; }
         public List<string> CategoryIds { get; set; }
         public bool IsFeatured { get; set; }
+        public int Stock { get; set; }
 
         public ProductViewModel()
         {
