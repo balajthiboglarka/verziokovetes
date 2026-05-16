@@ -247,11 +247,11 @@ namespace HotcakesShopManager.Views
             else if (rbCategorySummary.Checked)
             {
                 sb.AppendLine("=== Kategóriánkénti összesítés ===");
-                sb.AppendLine($"{"Kategória",-40} {"Termékek száma",16} {"Összes készlet",16}");
-                sb.AppendLine(new string('-', 76));
+                sb.AppendLine($"{"Kategória",-40} {"Termékek száma",16}");
+                sb.AppendLine(new string('-', 57));
                 var grouped = _products.GroupBy(p => string.IsNullOrEmpty(p.Category) ? "Besorolatlan" : p.Category);
                 foreach (var g in grouped.OrderBy(x => x.Key))
-                    sb.AppendLine($"{g.Key,-40} {g.Count(),16} {g.Sum(p => p.Quantity),16}");
+                    sb.AppendLine($"{g.Key,-40} {g.Count(),16}");
             }
             else if (rbSalesReport.Checked)
             {
@@ -316,10 +316,10 @@ namespace HotcakesShopManager.Views
                     }
                     else if (rbCategorySummary.Checked)
                     {
-                        csv.AppendLine("Kategória;Termékek száma;Összes készlet");
+                        csv.AppendLine("Kategória;Termékek száma");
                         var grouped = _products.GroupBy(p => string.IsNullOrEmpty(p.Category) ? "Besorolatlan" : p.Category);
                         foreach (var g in grouped.OrderBy(x => x.Key))
-                            csv.AppendLine($"\"{g.Key}\";{g.Count()};{g.Sum(p => p.Quantity)}");
+                            csv.AppendLine($"\"{g.Key}\";{g.Count()}");
                     }
                     else if (rbSalesReport.Checked && _orders != null)
                     {
