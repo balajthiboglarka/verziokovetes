@@ -12,6 +12,8 @@ namespace HotcakesShopManager.Views
         private FlowLayoutPanel flowPanel;
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private const int CardW = 480;
+        private List<ProductViewModel> _allProducts;
+        private TextBox _searchBox;
         private const int CardH = 530;
         private const int ImgH  = 360;
         public ImageQuickviewControl()
@@ -46,9 +48,57 @@ namespace HotcakesShopManager.Views
                 Padding = new Padding(20),
                 WrapContents = true
             };
+            var searchPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                Height = 70,
+                Padding = new Padding(20, 15, 20, 15),
+                BackColor = Color.White,
+                WrapContents = false
+            };
+            
+            var lblSearch = new Label
+            {
+                Text = "Keresés név alapján:",
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                AutoSize = true,
+                Margin = new Padding(0, 8, 15, 0),
+                ForeColor = Color.FromArgb(50, 50, 50)
+            };
+
+            var txtContainer = new Panel
+            {
+                Width = 400,
+                Height = 44,
+                BackColor = Color.White,
+                Margin = new Padding(0)
+            };
+            txtContainer.Paint += (s, e) => 
+            {
+                using(var pen = new Pen(Color.FromArgb(0, 75, 155), 2))
+                {
+                    e.Graphics.DrawRectangle(pen, 1, 1, txtContainer.Width - 3, txtContainer.Height - 3);
+                }
+            };
+            
+            _searchBox = new TextBox
+            {
+                BorderStyle = BorderStyle.None,
+                Location = new Point(10, 8),
+                Width = 380,
+                Font = new Font("Segoe UI", 12)
+            };
+            _searchBox.TextChanged += (s, e) => ApplyFilter();
+            
+            txtContainer.Controls.Add(_searchBox);
+            
+            searchPanel.Controls.Add(lblSearch);
+            searchPanel.Controls.Add(txtContainer);
+
             scrollPanel.Controls.Add(flowPanel);
             this.Controls.Add(scrollPanel);
             this.Controls.Add(borderLine);
+            this.Controls.Add(searchPanel);
             this.Controls.Add(titleLabel);
         }
         public void LoadData(List<ProductViewModel> products)
@@ -58,6 +108,39 @@ namespace HotcakesShopManager.Views
                 this.Invoke(new Action(() => LoadData(products)));
                 return;
             }
+            _allProducts = products;
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            if (_allProducts == null)
+            {
+                RenderProducts(null);
+                return;
+            }
+            
+            var searchText = _searchBox.Text.Trim();
+            if (string.IsNullOrEmpty(searchText))
+            {
+                RenderProducts(_allProducts);
+            }
+            else
+            {
+                var filtered = new List<ProductViewModel>();
+                foreach (var p in _allProducts)
+                {
+                    if (p.ProductName != null && p.ProductName.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        filtered.Add(p);
+                    }
+                }
+                RenderProducts(filtered);
+            }
+        }
+
+        private void RenderProducts(IEnumerable<ProductViewModel> products)
+        {
             _cts.Cancel();
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
