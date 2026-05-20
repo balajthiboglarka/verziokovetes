@@ -1,0 +1,50 @@
+Hotcakes Shop Manager - Egyszerűsített Unit Test Útmutató
+=======================================================
+
+Ez a dokumentum a HotcakesShopManager alkalmazás legfrissebb, letisztult unit tesztjeit foglalja össze.
+
+1. Hogyan futtasd a teszteket?
+------------------------------
+A tesztek futtatásához és a részletes magyar nyelvű naplók megtekintéséhez használd az alábbi parancsot:
+
+    dotnet test "HotcakesShopManager.Tests\HotcakesShopManager.Tests.csproj" --logger "console;verbosity=detailed"
+
+A tesztek a kimeneten megjelenítik:
+- A vizsgált TESZTESET nevét
+- A Bemeneti adatokat
+- A Folyamat leírását
+- Az Elvárt kimenetet
+- A Végeredményt (SIKERES)
+
+2. Mit vizsgálnak a tesztek (Összesen 14 eset)?
+-----------------------------------------------
+
+A) Kategória hozzárendelése
+- Ideális eset (több termék egyszerre)
+- Adatintegritás teszt (ár, név, készlet nem változik)
+- Duplikáció elkerülése (már meglévő kategória esetén)
+- Üres kijelölés kezelése
+
+B) Kategória eltávolítása
+- Ideális eset (egyik kategória törlése a több közül)
+- Nem létező kategória kezelése
+- Utolsó kategória törlése
+
+C) Alacsony készlet szűrése (Küszöbérték: 10 db)
+- Ideális eset (vegyes készlet szűrése)
+- Nincs találat (minden készlet elegendő)
+- Határérték teszt (pontosan 10 db)
+- Negatív készlet (hibás adatok megjelenítése)
+
+D) Kategóriánkénti összesítés
+- Ideális eset (darabszámok összegezése)
+- Üres kategória (0 készlet kezelése)
+- Kategorizálatlan termékek csoportosítása
+
+3. Fontos változások
+--------------------
+- Az alacsony készlet riasztási küszöbértéke 5-ről 10 darabra módosult.
+- A tesztek egyetlen fájlba kerültek az átláthatóság érdekében: SimplifiedFunctionalTests.cs
+
+Készítette: Antigravity AI
+Dátum: 2026.04.29.
