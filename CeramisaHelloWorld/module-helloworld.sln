@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37027.9
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ceramista.Dnn.HelloWorld", "Ceramista.Dnn.HelloWorld\Ceramista.Dnn.HelloWorld.csproj", "{4130D773-4930-4C21-9BCF-0C5244F585D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ceramista.Dnn.HelloWorld.Tests", "Ceramista.Dnn.HelloWorld.Tests\Ceramista.Dnn.HelloWorld.Tests.csproj", "{B2C3D4E5-F6A7-4890-BCDE-F12345678901}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4130D773-4930-4C21-9BCF-0C5244F585D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4130D773-4930-4C21-9BCF-0C5244F585D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4130D773-4930-4C21-9BCF-0C5244F585D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4130D773-4930-4C21-9BCF-0C5244F585D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2C3D4E5-F6A7-4890-BCDE-F12345678901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2C3D4E5-F6A7-4890-BCDE-F12345678901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2C3D4E5-F6A7-4890-BCDE-F12345678901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2C3D4E5-F6A7-4890-BCDE-F12345678901}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {09A36739-89B5-4B41-995B-BD6CFB8316AA}
+	EndGlobalSection
+EndGlobal
